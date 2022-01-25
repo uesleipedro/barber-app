@@ -1,17 +1,13 @@
 import React from 'react';
 import {
-  Text,
   useColorScheme,
-  View,
 } from 'react-native';
+import Router from './src/routes/Router';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View>
-      <Text>TESTE</Text>
-    </View>
-
+    <Router />
   );
 };
 
