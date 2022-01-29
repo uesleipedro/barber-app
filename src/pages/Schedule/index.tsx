@@ -8,14 +8,16 @@ import {
     TouchableOpacity,
     SafeAreaView,
     Dimensions,
-    Modal,
-    Alert,
-    Pressable
+    ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
+import CalendarStrip from 'react-native-calendar-strip';
+import 'moment';
+import 'moment/locale/pt-br';
 
-import Card from './Card';
-import Calendar from './Calendar';
+import Card, { CardHour } from './Card';
+import CardBarber from './Card/CardBarber';
+import ModalPicker from './ModalPicker';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -43,52 +45,101 @@ const Header = ({ navigationTarget, title }) => {
     );
 }
 
+const corte = [
+    {
+        id: 1,
+        describe: 'Corte na máquina',
+        time: '30 minutos',
+        price: '25.90'
+    },
+    {
+        id: 2,
+        describe: 'Corte na tesoura',
+        time: '45 minutos',
+        price: '35.90'
+    }
+];
+
 const Schedule = ({ navigation }) => {
-    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+    const [chooseData, setChooseData] = useState(Number(corte[0].id));
+
+    const setData = (option) => {
+        setChooseData(option);
+    }
+
+    let customDatesStyles = [];
+    customDatesStyles.push({
+        dateNameStyle: { color: 'white' },
+        dateNumberStyle: { color: 'white' },
+        highlightDateNameStyle: { color: 'pink' },
+        highlightDateNumberStyle: { color: 'white' },
+        dateContainerStyle: { backgroundColor: `#294045` },
+    });
+
+
 
     return (
         <SafeAreaView style={styles.constainer}>
-            <StatusBar backgroundColor='#242A38' barStyle="light-content" />
-            <Header
-                navigationTarget='Home'
-                title=""
-            />
+            <ScrollView>
+                <StatusBar backgroundColor='#242A38' barStyle="light-content" />
+                <Header
+                    navigationTarget='Home'
+                    title=""
+                />
 
-            <Text style={styles.title}>Agendamento</Text>
+                <Text style={styles.title}>Agendamento</Text>
 
-            <View style={styles.body}>
-                <Card title="Selecione o serviço" />
-                <Card title="Selecione o barbeiro" />
+                <View style={styles.body}>
 
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => {
-                        Alert.alert("Modal has been closed.");
-                        setModalVisible(!modalVisible);
-                    }}
-                >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <TouchableOpacity
-                                style={[styles.button]}
-                                onPress={() => setModalVisible(!modalVisible)}
-                            >
-                                <Text style={styles.textStyle}>Hide Modal</Text>
-                                <Text style={styles.textStyle}>Hide Modal</Text>
-                                <Text style={styles.textStyle}>Hide Modal</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <TouchableOpacity
+                        onPress={() => setIsModalVisible(true)}
+                    >
+                        <Card
+                            title="Selecione o serviço"
+                            dado={corte.filter(a => a.id === Number(chooseData))}
+                        />
+                    </TouchableOpacity>
+                    <CardBarber title="Selecione o barbeiro" />
+
+                    <View>
+                        <CalendarStrip
+                            scrollable
+                            calendarAnimation={{ type: 'sequence', duration: 30 }}
+                            daySelectionAnimation={{ type: 'background', duration: 300, highlightColor: '#9265DC' }}
+                            style={{ height: 100, width: windowWidth - 10, paddingTop: 20, paddingBottom: 10, marginTop: 20, elevation: 20 }}
+                            calendarHeaderStyle={{ color: 'white' }}
+                            calendarColor={'#242A38'}
+                            dateNumberStyle={{ color: 'white' }}
+                            dateNameStyle={{ color: 'white' }}
+                            iconContainer={{ flex: 0.1 }}
+                            customDatesStyles={customDatesStyles}
+                            highlightDateNameStyle={{ color: 'white' }}
+                            highlightDateNumberStyle={{ color: 'white' }}
+                            highlightDateContainerStyle={{ backgroundColor: '#F9A54E' }}
+                            useIsoWeekday={false}
+                        />
                     </View>
-                </Modal>
-                <Pressable
-                    onPress={() => setModalVisible(true)}
-                >
-                    <Calendar title="Selecione a data e hora" />
-                </Pressable>
+                    <CardHour title='Horário' />
+
+                </View>
+
+                <ModalPicker
+                    isModalVisible={isModalVisible}
+                    setIsModalVisible={setIsModalVisible}
+                    setData={setData}
+                    data={corte}
+                />
+
+            </ScrollView>
+            <View style={styles.finishPayment}>
+                <Text style={styles.priceText}>R$ 25,90</Text>
+                <TouchableOpacity style={styles.scheduleButtom}>
+                    <Text style={styles.buttonText}>Agendar</Text>
+                </TouchableOpacity>
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -97,19 +148,16 @@ export default Schedule;
 const styles = StyleSheet.create({
     constainer: {
         flex: 1,
-        height: windowHeight,
         width: windowWidth,
         backgroundColor: '#242A38',
         paddingHorizontal: 10
     },
     body: {
         flex: 1,
-        width: '100%',
-        height: '100%',
+        width: windowWidth,
         alignItems: 'center',
         marginTop: 10,
-        justifyContent: 'flex-start',
-        gap: 10
+        justifyContent: 'flex-start'
     },
     header: {
         flexDirection: 'row',
@@ -138,6 +186,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 10
     },
+    calendarContainer: {
+        marginTop: 20
+    },
+
 
     centeredView: {
         flex: 1,
@@ -160,10 +212,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5
     },
-    modalText: {
-        marginBottom: 15,
-        textAlign: "center"
-    },
     button: {
         borderRadius: 20,
         padding: 10,
@@ -180,4 +228,34 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center"
     },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
+    },
+
+    priceText: {
+        color: 'white',
+        fontSize: 26,
+        fontWeight: 'bold'
+    },
+    finishPayment: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10
+    },
+    scheduleButtom: {
+        height: 50,
+        width: 100,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F9A54E',
+        borderRadius: 30,
+        elevation: 10
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    }
 });

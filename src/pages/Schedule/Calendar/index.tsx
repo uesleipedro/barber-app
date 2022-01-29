@@ -3,9 +3,11 @@ import {
     View,
     StyleSheet,
     Text,
-    Dimensions
+    Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
+const width = Dimensions.get('window').width;
+const height = Dimensions.get('window').height;
 
 import { Calculations } from './Calculations';
 

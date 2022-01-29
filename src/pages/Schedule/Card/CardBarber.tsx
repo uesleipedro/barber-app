@@ -2,17 +2,17 @@ import React from 'react';
 import {
     View,
     StyleSheet,
-    Text,
     Dimensions,
-    ScrollView
+    Text,
+    Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-const Card = (props) => {
-    const { title, dado } = props;
+const CardBarber = (props) => {
+    const { title } = props;
 
     return (
         <View style={styles.container}>
@@ -21,55 +21,20 @@ const Card = (props) => {
                 <View style={styles.bordaCard}></View>
 
                 <View style={styles.firstDivision}>
-                    <Text style={styles.firstDivisionText}>{dado[0].describe}</Text>
-                    <Text style={styles.firstDivisionTextMinutes}>{dado[0].time}</Text>
+                    <Image
+                        style={styles.tinyLogo}
+                        source={require('../../../assets/avatar.png')}
+                    />
                 </View>
 
                 <View style={styles.secondDivisionContainer}>
-                    <View style={styles.secondDivision}>
-                        <Text style={styles.secondDivisionText}>R$ {dado[0].price.replace('.', ',')}</Text>
-                    </View>
+                    <Text style={styles.secondDivisionText}>Ueslei Pedro Rangel da Silva</Text>
                 </View>
 
                 <View style={styles.arrowDown}>
                     <Icon name='down' size={15} color='#FFF' />
                 </View>
             </View>
-        </View>
-    );
-}
-
-export const CardHour = ({ title }) => {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>{title}</Text>
-            <ScrollView style={styles.card2} horizontal>
-
-                <View style={styles.hour}>
-                    <Text style={styles.hourText}>09:00 am</Text>
-                </View>
-
-                <View style={styles.hour}>
-                    <Text style={styles.hourText}>10:00 am</Text>
-                </View>
-
-                <View style={styles.hour}>
-                    <Text style={styles.hourText}>11:00 am</Text>
-                </View>
-
-                <View style={styles.hour}>
-                    <Text style={styles.hourText}>12:00 pm</Text>
-                </View>
-
-                <View style={styles.hour}>
-                    <Text style={styles.hourText}>13:00 pm</Text>
-                </View>
-
-                <View style={styles.hour}>
-                    <Text style={styles.hourText}>14:00 pm</Text>
-                </View>
-
-            </ScrollView>
         </View>
     );
 }
@@ -99,7 +64,7 @@ const styles = StyleSheet.create({
         height: '100%'
     },
     firstDivision: {
-        width: '60%',
+        width: '20%',
         justifyContent: 'center',
         alignItems: 'flex-start',
         paddingLeft: 10
@@ -117,7 +82,7 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
     secondDivisionContainer: {
-        width: '20%',
+        width: '60%',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -159,7 +124,11 @@ const styles = StyleSheet.create({
     hourText: {
         color: '#FFF',
         fontWeight: 'bold'
-    }
+    },
+    tinyLogo: {
+        width: 50,
+        height: 50,
+    },
 });
 
-export default Card;
+export default CardBarber;
