@@ -12,7 +12,7 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 const CardBarber = (props) => {
-    const { title } = props;
+    const { title, dado } = props;
 
     return (
         <View style={styles.container}>
@@ -28,7 +28,7 @@ const CardBarber = (props) => {
                 </View>
 
                 <View style={styles.secondDivisionContainer}>
-                    <Text style={styles.secondDivisionText}>Ueslei Pedro Rangel da Silva</Text>
+                    <Text style={styles.secondDivisionText}>{dado[0].name}</Text>
                 </View>
 
                 <View style={styles.arrowDown}>

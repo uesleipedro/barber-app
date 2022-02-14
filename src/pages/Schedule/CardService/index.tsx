@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-const Card = (props) => {
+const CardService = (props) => {
     const { title, dado } = props;
 
     return (
@@ -162,4 +162,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Card;
+export default CardService;

@@ -1,16 +1,23 @@
-import { View, Text, Modal, StyleSheet, Pressable, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
-import React from 'react';
+import {
+    View,
+    Text,
+    Modal,
+    StyleSheet,
+    TouchableOpacity,
+    Dimensions,
+    ScrollView,
+} from 'react-native';
+import React, { useState } from 'react';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
-const DATA = ['Primeiro', 'Segundo', 'Terceiro', 'Quarto', 'Quinto', 'Sexto', 'Setimo', 'Oitavo'];
 
 const ModalPicker = (props) => {
-    const { setIsModalVisible, setData, isModalVisible, data } = props;
+    const { setIsModalVisible, setValue, isModalVisible, data, entryParameters } = props;
 
     const onPressItem = (option) => {
         setIsModalVisible(false);
-        setData(option)
+        setValue(option)
     }
 
     const options = data.map((item, index) => {
@@ -18,10 +25,12 @@ const ModalPicker = (props) => {
             <TouchableOpacity
                 style={styles.option}
                 key={index}
-                onPress={() => onPressItem(item.id)}
+                onPress={() => onPressItem(item[entryParameters.id])}
             >
+                <View style={styles.avatar}></View>
                 <Text style={styles.text}>
-                    {item.describe}
+
+                    {item[`${entryParameters.value}`]}
                 </Text>
             </TouchableOpacity>
         );
@@ -37,7 +46,7 @@ const ModalPicker = (props) => {
                 onPress={() => setIsModalVisible(false)}
                 style={styles.container}
             >
-                <View style={[styles.modal, { width: width - 20, height: height / 2 }]}>
+                <View style={[styles.modal, { width: width - 20, height: height * 0.9 }]}>
                     <ScrollView>
                         {options}
                     </ScrollView>
@@ -52,21 +61,33 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: '#000000AA'
     },
     modal: {
-        backgroundColor: 'white',
+        backgroundColor: '#242A38',
         borderRadius: 10
     },
     option: {
-        alignItems: 'flex-start'
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        borderWidth: 1,
+        borderBottomColor: 'grey',
+        paddingHorizontal: 5
     },
     text: {
         margin: 20,
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: 'bold',
-        color: '#000',
-        opacity: 0.6
+        color: 'white'
+    },
+    avatar: {
+        backgroundColor: '#2F414F',
+        width: 50,
+        height: 50,
+        borderRadius: 25
     }
 });
 

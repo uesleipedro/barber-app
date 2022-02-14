@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,77 +8,61 @@ import {
     TouchableOpacity,
     SafeAreaView,
     Dimensions,
-    ScrollView,
+    ScrollView
 } from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign';
 import CalendarStrip from 'react-native-calendar-strip';
 import 'moment';
 import 'moment/locale/pt-br';
 
-import Card, { CardHour } from './Card';
-import CardBarber from './Card/CardBarber';
+import Card, { CardHour } from './CardService';
+import CardBarber from './CardBarber';
 import ModalPicker from './ModalPicker';
+import { api } from '../../services/api';
+import axios from 'axios';
+import Header from '../../companents/Header';
 
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
-
-const Header = ({ navigationTarget, title }) => {
-    const navigation = useNavigation<any>();
-
-    return (
-        <View style={styles.header}>
-            <TouchableOpacity
-                style={styles.containerIcon}
-                onPress={() => {
-                    navigation.navigate(navigationTarget)
-                }} >
-                <Icon name='arrowleft' size={30} color='#FFF' />
-            </TouchableOpacity>
-
-            <View style={styles.containerText}>
-                <Text
-                    style={styles.textHeader}>
-                    {title}
-                </Text>
-            </View>
-        </View>
-    );
-}
-
-const corte = [
-    {
-        id: 1,
-        describe: 'Corte na máquina',
-        time: '30 minutos',
-        price: '25.90'
-    },
-    {
-        id: 2,
-        describe: 'Corte na tesoura',
-        time: '45 minutos',
-        price: '35.90'
-    }
-];
+const serviceVoid = { id: 0, describe: 'Clique para selecionar', time: '', price: '' };
+const barberVoid = { id: 0, name: 'Clique para selecionar', };
+const customDatesStyles = [];
+customDatesStyles.push({
+    dateNameStyle: { color: 'white' },
+    dateNumberStyle: { color: 'white' },
+    highlightDateNameStyle: { color: 'pink' },
+    highlightDateNumberStyle: { color: 'white' },
+    dateContainerStyle: { backgroundColor: `#294045` },
+});
 
 const Schedule = ({ navigation }) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-    const [chooseData, setChooseData] = useState(Number(corte[0].id));
+    const [isModalServiceVisible, setIsModalServiceVisible] = useState<boolean>(false);
+    const [isModalBarberVisible, setIsModalBarberVisible] = useState<boolean>(false);
+    const [chooseData, setChooseData] = useState(0);
+    const [chooseProfessional, setChooseProfessional] = useState(0);
+    const [services, setServicesData] = useState<any[]>([serviceVoid]);
+    const [professional, setProfessionalData] = useState<any[]>([barberVoid]);
 
-    const setData = (option) => {
-        setChooseData(option);
+    const setService = option => setChooseData(option);
+    const setProfessional = option => setChooseProfessional(option);
+
+    useEffect(() => {
+        fetchServices();
+    }, []);
+
+    const getService = () => api.get('service');
+    const getBarber = () => api.get('professional');
+
+    const fetchServices = async () => {
+
+        await axios.all([getService(), getBarber()])
+            .then(axios.spread(function (resService, resBarber) {
+                setServicesData([...services, ...resService.data]);
+                setProfessionalData([...professional, ...resBarber.data]);
+            }))
+            .catch(function (error) {
+                console.error(error.message);
+            });
     }
-
-    let customDatesStyles = [];
-    customDatesStyles.push({
-        dateNameStyle: { color: 'white' },
-        dateNumberStyle: { color: 'white' },
-        highlightDateNameStyle: { color: 'pink' },
-        highlightDateNumberStyle: { color: 'white' },
-        dateContainerStyle: { backgroundColor: `#294045` },
-    });
-
-
 
     return (
         <SafeAreaView style={styles.constainer}>
@@ -94,14 +78,21 @@ const Schedule = ({ navigation }) => {
                 <View style={styles.body}>
 
                     <TouchableOpacity
-                        onPress={() => setIsModalVisible(true)}
+                        onPress={() => setIsModalServiceVisible(true)}
                     >
                         <Card
                             title="Selecione o serviço"
-                            dado={corte.filter(a => a.id === Number(chooseData))}
+                            dado={services.filter(service => service.id === Number(chooseData))}
                         />
                     </TouchableOpacity>
-                    <CardBarber title="Selecione o barbeiro" />
+                    <TouchableOpacity
+                        onPress={() => setIsModalBarberVisible(true)}
+                    >
+                        <CardBarber
+                            title="Selecione o barbeiro"
+                            dado={professional.filter(professional => professional.id === Number(chooseProfessional))}
+                        />
+                    </TouchableOpacity>
 
                     <View>
                         <CalendarStrip
@@ -119,6 +110,10 @@ const Schedule = ({ navigation }) => {
                             highlightDateNumberStyle={{ color: 'white' }}
                             highlightDateContainerStyle={{ backgroundColor: '#F9A54E' }}
                             useIsoWeekday={false}
+                            selectedDate={selectedDate}
+                            onDateSelected={(date: any) =>
+                                setSelectedDate(date)
+                            }
                         />
                     </View>
                     <CardHour title='Horário' />
@@ -126,10 +121,19 @@ const Schedule = ({ navigation }) => {
                 </View>
 
                 <ModalPicker
-                    isModalVisible={isModalVisible}
-                    setIsModalVisible={setIsModalVisible}
-                    setData={setData}
-                    data={corte}
+                    isModalVisible={isModalServiceVisible}
+                    setIsModalVisible={setIsModalServiceVisible}
+                    setValue={setService}
+                    data={services}
+                    entryParameters={{ id: 'id', value: 'describe' }}
+                />
+
+                <ModalPicker
+                    isModalVisible={isModalBarberVisible}
+                    setIsModalVisible={setIsModalBarberVisible}
+                    setValue={setProfessional}
+                    data={professional}
+                    entryParameters={{ id: 'id', value: 'name' }}
                 />
 
             </ScrollView>
@@ -159,27 +163,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         justifyContent: 'flex-start'
     },
-    header: {
-        flexDirection: 'row',
-        height: 40,
-        width: '100%',
-        alignItems: 'center',
-    },
-    textHeader: {
-        color: '#FFF',
-        fontWeight: 'bold',
-        fontSize: 20
-    },
-    containerIcon: {
-        justifyContent: 'center',
-        height: '100%',
-        width: '20%'
-    },
-    containerText: {
-        justifyContent: 'center',
-        height: '100%',
-        width: '80%'
-    },
+
     title: {
         color: '#FFF',
         fontSize: 28,
