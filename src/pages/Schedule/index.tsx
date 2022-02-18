@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     StatusBar,
     TouchableOpacity,
     SafeAreaView,
@@ -14,24 +13,14 @@ import CalendarStrip from 'react-native-calendar-strip';
 import 'moment';
 import 'moment/locale/pt-br';
 
-import Card, { CardHour } from './CardService';
+import Card from './CardService';
+import CardHour from './CardHour';
 import CardBarber from './CardBarber';
 import ModalPicker from './ModalPicker';
 import { api } from '../../services/api';
 import axios from 'axios';
 import Header from '../../companents/Header';
-
-const windowWidth = Dimensions.get('window').width;
-const serviceVoid = { id: 0, describe: 'Clique para selecionar', time: '', price: '' };
-const barberVoid = { id: 0, name: 'Clique para selecionar', };
-const customDatesStyles = [];
-customDatesStyles.push({
-    dateNameStyle: { color: 'white' },
-    dateNumberStyle: { color: 'white' },
-    highlightDateNameStyle: { color: 'pink' },
-    highlightDateNumberStyle: { color: 'white' },
-    dateContainerStyle: { backgroundColor: `#294045` },
-});
+import styles, { customDatesStyles } from './styles';
 
 const Schedule = ({ navigation }) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -39,22 +28,26 @@ const Schedule = ({ navigation }) => {
     const [isModalBarberVisible, setIsModalBarberVisible] = useState<boolean>(false);
     const [chooseData, setChooseData] = useState(0);
     const [chooseProfessional, setChooseProfessional] = useState(0);
-    const [services, setServicesData] = useState<any[]>([serviceVoid]);
-    const [professional, setProfessionalData] = useState<any[]>([barberVoid]);
+    const [services, setServicesData] = useState<any[]>([
+        { id: 0, describe: 'Clique para selecionar', time: '', price: '' }
+    ]);
+    const [professional, setProfessionalData] = useState<any[]>([
+        { id: 0, name: 'Clique para selecionar' }
+    ]);
+    const [hourList, setHourList] = useState<string[]>(['09:00:00', '10:00:00', '11:00:00']);
+    const [selectedHour, setSelectedHour] = useState<string>();
+    const windowWidth = Dimensions.get('window').width;
+
+    console.log(selectedHour)
 
     const setService = option => setChooseData(option);
     const setProfessional = option => setChooseProfessional(option);
 
     useEffect(() => {
-        fetchServices();
-    }, []);
+        const getService = () => api.get('service');
+        const getBarber = () => api.get('professional');
 
-    const getService = () => api.get('service');
-    const getBarber = () => api.get('professional');
-
-    const fetchServices = async () => {
-
-        await axios.all([getService(), getBarber()])
+        axios.all([getService(), getBarber()])
             .then(axios.spread(function (resService, resBarber) {
                 setServicesData([...services, ...resService.data]);
                 setProfessionalData([...professional, ...resBarber.data]);
@@ -62,7 +55,7 @@ const Schedule = ({ navigation }) => {
             .catch(function (error) {
                 console.error(error.message);
             });
-    }
+    }, []);
 
     return (
         <SafeAreaView style={styles.constainer}>
@@ -116,7 +109,11 @@ const Schedule = ({ navigation }) => {
                             }
                         />
                     </View>
-                    <CardHour title='Horário' />
+
+                    <CardHour
+                        hourList={hourList}
+                        setSelectedHour={setSelectedHour}
+                    />
 
                 </View>
 
@@ -149,97 +146,3 @@ const Schedule = ({ navigation }) => {
 
 export default Schedule;
 
-const styles = StyleSheet.create({
-    constainer: {
-        flex: 1,
-        width: windowWidth,
-        backgroundColor: '#242A38',
-        paddingHorizontal: 10
-    },
-    body: {
-        flex: 1,
-        width: windowWidth,
-        alignItems: 'center',
-        marginTop: 10,
-        justifyContent: 'flex-start'
-    },
-
-    title: {
-        color: '#FFF',
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginTop: 10
-    },
-    calendarContainer: {
-        marginTop: 20
-    },
-
-
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 22
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5
-    },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2
-    },
-    buttonOpen: {
-        backgroundColor: "#F194FF",
-    },
-    buttonClose: {
-        backgroundColor: "#2196F3",
-    },
-    textStyle: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center"
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: "center"
-    },
-
-    priceText: {
-        color: 'white',
-        fontSize: 26,
-        fontWeight: 'bold'
-    },
-    finishPayment: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10
-    },
-    scheduleButtom: {
-        height: 50,
-        width: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F9A54E',
-        borderRadius: 30,
-        elevation: 10
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
-    }
-});
